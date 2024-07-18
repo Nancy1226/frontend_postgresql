@@ -1,0 +1,732 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    IP
+    PASSWORD
+    PORT
+    USERNAME
+    VALUES
+
+Grammar
+
+Rule 0     S' -> start
+Rule 1     start -> statements
+Rule 2     statements -> statement
+Rule 3     statements -> statement statements
+Rule 4     statement -> create_database
+Rule 5     statement -> drop_database
+Rule 6     statement -> alter_database
+Rule 7     statement -> create_table
+Rule 8     statement -> insert_into
+Rule 9     statement -> select_statement
+Rule 10    create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+Rule 11    drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+Rule 12    alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+Rule 13    create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON
+Rule 14    columns -> column
+Rule 15    columns -> column COMMA columns
+Rule 16    column -> IDENTIFIER column_type constraints
+Rule 17    column_type -> INT
+Rule 18    column_type -> VARCHAR LPAREN NUMBER RPAREN
+Rule 19    column_type -> SQL_KEYWORD
+Rule 20    constraints -> constraint
+Rule 21    constraints -> constraint constraints
+Rule 22    constraints -> empty
+Rule 23    constraint -> SQL_KEYWORD SQL_KEYWORD
+Rule 24    constraint -> SQL_KEYWORD
+Rule 25    insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+Rule 26    identifiers -> IDENTIFIER
+Rule 27    identifiers -> IDENTIFIER COMMA identifiers
+Rule 28    values -> value
+Rule 29    values -> value COMMA values
+Rule 30    value -> STRING
+Rule 31    value -> NUMBER
+Rule 32    select_statement -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON
+Rule 33    select_statement -> SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON
+Rule 34    empty -> <empty>
+
+Terminals, with rules where they appear
+
+COMMA                : 15 27 29
+IDENTIFIER           : 10 11 12 12 13 16 25 26 27 32 32 33
+INT                  : 17
+IP                   : 
+LPAREN               : 13 18 25 25
+NUMBER               : 18 31
+PASSWORD             : 
+PORT                 : 
+RPAREN               : 13 18 25 25
+SEMICOLON            : 10 11 12 13 25 32 33
+SQL_KEYWORD          : 10 10 11 11 12 12 12 12 13 13 19 23 23 24 25 25 25 32 32 32 33 33 33
+STRING               : 30
+USERNAME             : 
+VALUES               : 
+VARCHAR              : 18
+error                : 
+
+Nonterminals, with rules where they appear
+
+alter_database       : 6
+column               : 14 15
+column_type          : 16
+columns              : 13 15
+constraint           : 20 21
+constraints          : 16 21
+create_database      : 4
+create_table         : 7
+drop_database        : 5
+empty                : 22
+identifiers          : 25 27 33
+insert_into          : 8
+select_statement     : 9
+start                : 0
+statement            : 2 3
+statements           : 1 3
+value                : 28 29
+values               : 25 29
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . start
+    (1) start -> . statements
+    (2) statements -> . statement
+    (3) statements -> . statement statements
+    (4) statement -> . create_database
+    (5) statement -> . drop_database
+    (6) statement -> . alter_database
+    (7) statement -> . create_table
+    (8) statement -> . insert_into
+    (9) statement -> . select_statement
+    (10) create_database -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (11) drop_database -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (12) alter_database -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (13) create_table -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON
+    (25) insert_into -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+    (32) select_statement -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON
+    (33) select_statement -> . SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON
+
+    SQL_KEYWORD     shift and go to state 10
+
+    start                          shift and go to state 1
+    statements                     shift and go to state 2
+    statement                      shift and go to state 3
+    create_database                shift and go to state 4
+    drop_database                  shift and go to state 5
+    alter_database                 shift and go to state 6
+    create_table                   shift and go to state 7
+    insert_into                    shift and go to state 8
+    select_statement               shift and go to state 9
+
+state 1
+
+    (0) S' -> start .
+
+
+
+state 2
+
+    (1) start -> statements .
+
+    $end            reduce using rule 1 (start -> statements .)
+
+
+state 3
+
+    (2) statements -> statement .
+    (3) statements -> statement . statements
+    (2) statements -> . statement
+    (3) statements -> . statement statements
+    (4) statement -> . create_database
+    (5) statement -> . drop_database
+    (6) statement -> . alter_database
+    (7) statement -> . create_table
+    (8) statement -> . insert_into
+    (9) statement -> . select_statement
+    (10) create_database -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (11) drop_database -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (12) alter_database -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (13) create_table -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON
+    (25) insert_into -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+    (32) select_statement -> . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON
+    (33) select_statement -> . SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON
+
+    $end            reduce using rule 2 (statements -> statement .)
+    SQL_KEYWORD     shift and go to state 10
+
+    statement                      shift and go to state 3
+    statements                     shift and go to state 11
+    create_database                shift and go to state 4
+    drop_database                  shift and go to state 5
+    alter_database                 shift and go to state 6
+    create_table                   shift and go to state 7
+    insert_into                    shift and go to state 8
+    select_statement               shift and go to state 9
+
+state 4
+
+    (4) statement -> create_database .
+
+    SQL_KEYWORD     reduce using rule 4 (statement -> create_database .)
+    $end            reduce using rule 4 (statement -> create_database .)
+
+
+state 5
+
+    (5) statement -> drop_database .
+
+    SQL_KEYWORD     reduce using rule 5 (statement -> drop_database .)
+    $end            reduce using rule 5 (statement -> drop_database .)
+
+
+state 6
+
+    (6) statement -> alter_database .
+
+    SQL_KEYWORD     reduce using rule 6 (statement -> alter_database .)
+    $end            reduce using rule 6 (statement -> alter_database .)
+
+
+state 7
+
+    (7) statement -> create_table .
+
+    SQL_KEYWORD     reduce using rule 7 (statement -> create_table .)
+    $end            reduce using rule 7 (statement -> create_table .)
+
+
+state 8
+
+    (8) statement -> insert_into .
+
+    SQL_KEYWORD     reduce using rule 8 (statement -> insert_into .)
+    $end            reduce using rule 8 (statement -> insert_into .)
+
+
+state 9
+
+    (9) statement -> select_statement .
+
+    SQL_KEYWORD     reduce using rule 9 (statement -> select_statement .)
+    $end            reduce using rule 9 (statement -> select_statement .)
+
+
+state 10
+
+    (10) create_database -> SQL_KEYWORD . SQL_KEYWORD IDENTIFIER SEMICOLON
+    (11) drop_database -> SQL_KEYWORD . SQL_KEYWORD IDENTIFIER SEMICOLON
+    (12) alter_database -> SQL_KEYWORD . SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (13) create_table -> SQL_KEYWORD . SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON
+    (25) insert_into -> SQL_KEYWORD . SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+    (32) select_statement -> SQL_KEYWORD . SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON
+    (33) select_statement -> SQL_KEYWORD . SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON
+
+    SQL_KEYWORD     shift and go to state 12
+
+
+state 11
+
+    (3) statements -> statement statements .
+
+    $end            reduce using rule 3 (statements -> statement statements .)
+
+
+state 12
+
+    (10) create_database -> SQL_KEYWORD SQL_KEYWORD . IDENTIFIER SEMICOLON
+    (11) drop_database -> SQL_KEYWORD SQL_KEYWORD . IDENTIFIER SEMICOLON
+    (12) alter_database -> SQL_KEYWORD SQL_KEYWORD . IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (13) create_table -> SQL_KEYWORD SQL_KEYWORD . IDENTIFIER LPAREN columns RPAREN SEMICOLON
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD . IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+    (32) select_statement -> SQL_KEYWORD SQL_KEYWORD . IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON
+    (33) select_statement -> SQL_KEYWORD SQL_KEYWORD . identifiers SQL_KEYWORD IDENTIFIER SEMICOLON
+    (26) identifiers -> . IDENTIFIER
+    (27) identifiers -> . IDENTIFIER COMMA identifiers
+
+    IDENTIFIER      shift and go to state 13
+
+    identifiers                    shift and go to state 14
+
+state 13
+
+    (10) create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER . SEMICOLON
+    (11) drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER . SEMICOLON
+    (12) alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER . SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON
+    (13) create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER . LPAREN columns RPAREN SEMICOLON
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER . LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+    (32) select_statement -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER . SQL_KEYWORD IDENTIFIER SEMICOLON
+    (26) identifiers -> IDENTIFIER .
+    (27) identifiers -> IDENTIFIER . COMMA identifiers
+
+  ! shift/reduce conflict for SQL_KEYWORD resolved as shift
+    SEMICOLON       shift and go to state 16
+    SQL_KEYWORD     shift and go to state 15
+    LPAREN          shift and go to state 17
+    COMMA           shift and go to state 18
+
+  ! SQL_KEYWORD     [ reduce using rule 26 (identifiers -> IDENTIFIER .) ]
+
+
+state 14
+
+    (33) select_statement -> SQL_KEYWORD SQL_KEYWORD identifiers . SQL_KEYWORD IDENTIFIER SEMICOLON
+
+    SQL_KEYWORD     shift and go to state 19
+
+
+state 15
+
+    (12) alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD . SQL_KEYWORD IDENTIFIER SEMICOLON
+    (32) select_statement -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD . IDENTIFIER SEMICOLON
+
+    SQL_KEYWORD     shift and go to state 20
+    IDENTIFIER      shift and go to state 21
+
+
+state 16
+
+    (10) create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .
+    (11) drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .
+
+  ! reduce/reduce conflict for SQL_KEYWORD resolved using rule 10 (create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .)
+  ! reduce/reduce conflict for $end resolved using rule 10 (create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .)
+    SQL_KEYWORD     reduce using rule 10 (create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .)
+    $end            reduce using rule 10 (create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .)
+
+  ! SQL_KEYWORD     [ reduce using rule 11 (drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .) ]
+  ! $end            [ reduce using rule 11 (drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .) ]
+
+
+state 17
+
+    (13) create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN . columns RPAREN SEMICOLON
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN . identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+    (14) columns -> . column
+    (15) columns -> . column COMMA columns
+    (26) identifiers -> . IDENTIFIER
+    (27) identifiers -> . IDENTIFIER COMMA identifiers
+    (16) column -> . IDENTIFIER column_type constraints
+
+    IDENTIFIER      shift and go to state 22
+
+    columns                        shift and go to state 23
+    identifiers                    shift and go to state 24
+    column                         shift and go to state 25
+
+state 18
+
+    (27) identifiers -> IDENTIFIER COMMA . identifiers
+    (26) identifiers -> . IDENTIFIER
+    (27) identifiers -> . IDENTIFIER COMMA identifiers
+
+    IDENTIFIER      shift and go to state 26
+
+    identifiers                    shift and go to state 27
+
+state 19
+
+    (33) select_statement -> SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD . IDENTIFIER SEMICOLON
+
+    IDENTIFIER      shift and go to state 28
+
+
+state 20
+
+    (12) alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD . IDENTIFIER SEMICOLON
+
+    IDENTIFIER      shift and go to state 29
+
+
+state 21
+
+    (32) select_statement -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER . SEMICOLON
+
+    SEMICOLON       shift and go to state 30
+
+
+state 22
+
+    (26) identifiers -> IDENTIFIER .
+    (27) identifiers -> IDENTIFIER . COMMA identifiers
+    (16) column -> IDENTIFIER . column_type constraints
+    (17) column_type -> . INT
+    (18) column_type -> . VARCHAR LPAREN NUMBER RPAREN
+    (19) column_type -> . SQL_KEYWORD
+
+    RPAREN          reduce using rule 26 (identifiers -> IDENTIFIER .)
+    COMMA           shift and go to state 18
+    INT             shift and go to state 32
+    VARCHAR         shift and go to state 33
+    SQL_KEYWORD     shift and go to state 34
+
+    column_type                    shift and go to state 31
+
+state 23
+
+    (13) create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns . RPAREN SEMICOLON
+
+    RPAREN          shift and go to state 35
+
+
+state 24
+
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers . RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+
+    RPAREN          shift and go to state 36
+
+
+state 25
+
+    (14) columns -> column .
+    (15) columns -> column . COMMA columns
+
+    RPAREN          reduce using rule 14 (columns -> column .)
+    COMMA           shift and go to state 37
+
+
+state 26
+
+    (26) identifiers -> IDENTIFIER .
+    (27) identifiers -> IDENTIFIER . COMMA identifiers
+
+    SQL_KEYWORD     reduce using rule 26 (identifiers -> IDENTIFIER .)
+    RPAREN          reduce using rule 26 (identifiers -> IDENTIFIER .)
+    COMMA           shift and go to state 18
+
+
+state 27
+
+    (27) identifiers -> IDENTIFIER COMMA identifiers .
+
+    SQL_KEYWORD     reduce using rule 27 (identifiers -> IDENTIFIER COMMA identifiers .)
+    RPAREN          reduce using rule 27 (identifiers -> IDENTIFIER COMMA identifiers .)
+
+
+state 28
+
+    (33) select_statement -> SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER . SEMICOLON
+
+    SEMICOLON       shift and go to state 38
+
+
+state 29
+
+    (12) alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER . SEMICOLON
+
+    SEMICOLON       shift and go to state 39
+
+
+state 30
+
+    (32) select_statement -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON .
+
+    SQL_KEYWORD     reduce using rule 32 (select_statement -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON .)
+    $end            reduce using rule 32 (select_statement -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON .)
+
+
+state 31
+
+    (16) column -> IDENTIFIER column_type . constraints
+    (20) constraints -> . constraint
+    (21) constraints -> . constraint constraints
+    (22) constraints -> . empty
+    (23) constraint -> . SQL_KEYWORD SQL_KEYWORD
+    (24) constraint -> . SQL_KEYWORD
+    (34) empty -> .
+
+    SQL_KEYWORD     shift and go to state 43
+    COMMA           reduce using rule 34 (empty -> .)
+    RPAREN          reduce using rule 34 (empty -> .)
+
+    constraints                    shift and go to state 40
+    constraint                     shift and go to state 41
+    empty                          shift and go to state 42
+
+state 32
+
+    (17) column_type -> INT .
+
+    SQL_KEYWORD     reduce using rule 17 (column_type -> INT .)
+    COMMA           reduce using rule 17 (column_type -> INT .)
+    RPAREN          reduce using rule 17 (column_type -> INT .)
+
+
+state 33
+
+    (18) column_type -> VARCHAR . LPAREN NUMBER RPAREN
+
+    LPAREN          shift and go to state 44
+
+
+state 34
+
+    (19) column_type -> SQL_KEYWORD .
+
+    SQL_KEYWORD     reduce using rule 19 (column_type -> SQL_KEYWORD .)
+    COMMA           reduce using rule 19 (column_type -> SQL_KEYWORD .)
+    RPAREN          reduce using rule 19 (column_type -> SQL_KEYWORD .)
+
+
+state 35
+
+    (13) create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN . SEMICOLON
+
+    SEMICOLON       shift and go to state 45
+
+
+state 36
+
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN . SQL_KEYWORD LPAREN values RPAREN SEMICOLON
+
+    SQL_KEYWORD     shift and go to state 46
+
+
+state 37
+
+    (15) columns -> column COMMA . columns
+    (14) columns -> . column
+    (15) columns -> . column COMMA columns
+    (16) column -> . IDENTIFIER column_type constraints
+
+    IDENTIFIER      shift and go to state 48
+
+    column                         shift and go to state 25
+    columns                        shift and go to state 47
+
+state 38
+
+    (33) select_statement -> SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON .
+
+    SQL_KEYWORD     reduce using rule 33 (select_statement -> SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON .)
+    $end            reduce using rule 33 (select_statement -> SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON .)
+
+
+state 39
+
+    (12) alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .
+
+    SQL_KEYWORD     reduce using rule 12 (alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .)
+    $end            reduce using rule 12 (alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON .)
+
+
+state 40
+
+    (16) column -> IDENTIFIER column_type constraints .
+
+    COMMA           reduce using rule 16 (column -> IDENTIFIER column_type constraints .)
+    RPAREN          reduce using rule 16 (column -> IDENTIFIER column_type constraints .)
+
+
+state 41
+
+    (20) constraints -> constraint .
+    (21) constraints -> constraint . constraints
+    (20) constraints -> . constraint
+    (21) constraints -> . constraint constraints
+    (22) constraints -> . empty
+    (23) constraint -> . SQL_KEYWORD SQL_KEYWORD
+    (24) constraint -> . SQL_KEYWORD
+    (34) empty -> .
+
+  ! reduce/reduce conflict for COMMA resolved using rule 20 (constraints -> constraint .)
+  ! reduce/reduce conflict for RPAREN resolved using rule 20 (constraints -> constraint .)
+    COMMA           reduce using rule 20 (constraints -> constraint .)
+    RPAREN          reduce using rule 20 (constraints -> constraint .)
+    SQL_KEYWORD     shift and go to state 43
+
+  ! COMMA           [ reduce using rule 34 (empty -> .) ]
+  ! RPAREN          [ reduce using rule 34 (empty -> .) ]
+
+    constraint                     shift and go to state 41
+    constraints                    shift and go to state 49
+    empty                          shift and go to state 42
+
+state 42
+
+    (22) constraints -> empty .
+
+    COMMA           reduce using rule 22 (constraints -> empty .)
+    RPAREN          reduce using rule 22 (constraints -> empty .)
+
+
+state 43
+
+    (23) constraint -> SQL_KEYWORD . SQL_KEYWORD
+    (24) constraint -> SQL_KEYWORD .
+
+  ! shift/reduce conflict for SQL_KEYWORD resolved as shift
+    SQL_KEYWORD     shift and go to state 50
+    COMMA           reduce using rule 24 (constraint -> SQL_KEYWORD .)
+    RPAREN          reduce using rule 24 (constraint -> SQL_KEYWORD .)
+
+  ! SQL_KEYWORD     [ reduce using rule 24 (constraint -> SQL_KEYWORD .) ]
+
+
+state 44
+
+    (18) column_type -> VARCHAR LPAREN . NUMBER RPAREN
+
+    NUMBER          shift and go to state 51
+
+
+state 45
+
+    (13) create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON .
+
+    SQL_KEYWORD     reduce using rule 13 (create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON .)
+    $end            reduce using rule 13 (create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON .)
+
+
+state 46
+
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD . LPAREN values RPAREN SEMICOLON
+
+    LPAREN          shift and go to state 52
+
+
+state 47
+
+    (15) columns -> column COMMA columns .
+
+    RPAREN          reduce using rule 15 (columns -> column COMMA columns .)
+
+
+state 48
+
+    (16) column -> IDENTIFIER . column_type constraints
+    (17) column_type -> . INT
+    (18) column_type -> . VARCHAR LPAREN NUMBER RPAREN
+    (19) column_type -> . SQL_KEYWORD
+
+    INT             shift and go to state 32
+    VARCHAR         shift and go to state 33
+    SQL_KEYWORD     shift and go to state 34
+
+    column_type                    shift and go to state 31
+
+state 49
+
+    (21) constraints -> constraint constraints .
+
+    COMMA           reduce using rule 21 (constraints -> constraint constraints .)
+    RPAREN          reduce using rule 21 (constraints -> constraint constraints .)
+
+
+state 50
+
+    (23) constraint -> SQL_KEYWORD SQL_KEYWORD .
+
+    SQL_KEYWORD     reduce using rule 23 (constraint -> SQL_KEYWORD SQL_KEYWORD .)
+    COMMA           reduce using rule 23 (constraint -> SQL_KEYWORD SQL_KEYWORD .)
+    RPAREN          reduce using rule 23 (constraint -> SQL_KEYWORD SQL_KEYWORD .)
+
+
+state 51
+
+    (18) column_type -> VARCHAR LPAREN NUMBER . RPAREN
+
+    RPAREN          shift and go to state 53
+
+
+state 52
+
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN . values RPAREN SEMICOLON
+    (28) values -> . value
+    (29) values -> . value COMMA values
+    (30) value -> . STRING
+    (31) value -> . NUMBER
+
+    STRING          shift and go to state 56
+    NUMBER          shift and go to state 57
+
+    values                         shift and go to state 54
+    value                          shift and go to state 55
+
+state 53
+
+    (18) column_type -> VARCHAR LPAREN NUMBER RPAREN .
+
+    SQL_KEYWORD     reduce using rule 18 (column_type -> VARCHAR LPAREN NUMBER RPAREN .)
+    COMMA           reduce using rule 18 (column_type -> VARCHAR LPAREN NUMBER RPAREN .)
+    RPAREN          reduce using rule 18 (column_type -> VARCHAR LPAREN NUMBER RPAREN .)
+
+
+state 54
+
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values . RPAREN SEMICOLON
+
+    RPAREN          shift and go to state 58
+
+
+state 55
+
+    (28) values -> value .
+    (29) values -> value . COMMA values
+
+    RPAREN          reduce using rule 28 (values -> value .)
+    COMMA           shift and go to state 59
+
+
+state 56
+
+    (30) value -> STRING .
+
+    COMMA           reduce using rule 30 (value -> STRING .)
+    RPAREN          reduce using rule 30 (value -> STRING .)
+
+
+state 57
+
+    (31) value -> NUMBER .
+
+    COMMA           reduce using rule 31 (value -> NUMBER .)
+    RPAREN          reduce using rule 31 (value -> NUMBER .)
+
+
+state 58
+
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN . SEMICOLON
+
+    SEMICOLON       shift and go to state 60
+
+
+state 59
+
+    (29) values -> value COMMA . values
+    (28) values -> . value
+    (29) values -> . value COMMA values
+    (30) value -> . STRING
+    (31) value -> . NUMBER
+
+    STRING          shift and go to state 56
+    NUMBER          shift and go to state 57
+
+    value                          shift and go to state 55
+    values                         shift and go to state 61
+
+state 60
+
+    (25) insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON .
+
+    SQL_KEYWORD     reduce using rule 25 (insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON .)
+    $end            reduce using rule 25 (insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON .)
+
+
+state 61
+
+    (29) values -> value COMMA values .
+
+    RPAREN          reduce using rule 29 (values -> value COMMA values .)
+
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for SQL_KEYWORD in state 13 resolved as shift
+WARNING: shift/reduce conflict for SQL_KEYWORD in state 43 resolved as shift
+WARNING: reduce/reduce conflict in state 16 resolved using rule (create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON)
+WARNING: rejected rule (drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON) in state 16
+WARNING: reduce/reduce conflict in state 41 resolved using rule (constraints -> constraint)
+WARNING: rejected rule (empty -> <empty>) in state 41
+WARNING: Rule (drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON) is never reduced

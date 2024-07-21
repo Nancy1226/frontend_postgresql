@@ -11,7 +11,7 @@ function Dashboard() {
   const [selectedDB, setSelectedDB] = useState(null);
   const [lexicalResults, setLexicalResults] = useState([]);
   const [databases, setDatabases] = useState([]);
-  const [datatables, setDatatables] = useState([]);
+  const [databaseName, setdatabaseName] = useState([]);
 
 
   useEffect(() => {
@@ -37,12 +37,12 @@ function Dashboard() {
     async function obtenerTable() {
       try {
         const response = await getTable();
-        if (response.data.datatables) {
-          setDatatables(response.data.datatables);
+        if (response.data.tables) {
+          setdatabaseName(response.data.tables);
           setMessage('');
         } else if (response.data.message) {
           setMessage(response.data.message);
-          setDatatables([]);
+          setdatabaseName([]);
         }
       } catch (error) {
         if (error.response) {
@@ -57,7 +57,7 @@ function Dashboard() {
     obtenerTable();
   }, [Change]);
   
-  
+  // CREACION DE LA BASE DE DATOS
   const handleSubmitDatabase = async (values) => {
   console.log(values)
     try {
@@ -74,7 +74,7 @@ function Dashboard() {
     }
 };
   
-
+// SELECCION DE LA BASE DE DATOS
   const handleSubmitSelectDB = async (values) => {
     try {
       const response = await selectDB(values);
@@ -93,6 +93,35 @@ function Dashboard() {
           icon: "error",
           title: "Error",
           text: "No se pudo seleccionar la base de datos."
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al intentar seleccionar la base de datos."
+      });
+    }
+  };
+
+  const handleSubmitCrearTable = async (values) => {
+    console.log("Se llama a handleSubmitCrearTable con los valores:", values);
+    try {
+      const response = await createTable(values);
+      console.log("IMPRIMIENDO EL RESPONSE")
+      console.log(values)
+      console.log(response.status)
+      if (response.status === 200) {
+        Swal.fire({
+          title: "Creado con exito la tabla",
+          text: " ",
+          icon: "success"
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo crear la tabla."
         });
       }
     } catch (error) {
@@ -168,7 +197,7 @@ function Dashboard() {
             </ul>
           )}
         </ul>
-
+                    {/* CREACION DE LA BASE DE DATOS */}
         <Formik
           initialValues={{ sql: ''}}
           validate={values => {
@@ -185,14 +214,11 @@ function Dashboard() {
                 errors.sql = 'La sentencia SQL no cumple con el formato requerido.';
               }
             }
-            if (!values.tableName) {
-              errors.tableName = 'Required';
-            }
+            
             return errors;
           }}
-          onSubmit={(values, { setSubmitting }) => {
+          onSubmit={(values) => {
             handleSubmitDatabase(values);
-            setSubmitting(false);
           }}
         >
           {({
@@ -245,7 +271,7 @@ function Dashboard() {
             </form>
           )}
         </Formik>
-
+        {/* SELECCION DE LA BASE DE DATOS */}
         <Formik
             initialValues={{ databaseName: '' }}
             validate={values => {
@@ -296,9 +322,10 @@ function Dashboard() {
             )}
         </Formik>
 
-
+        {/* CREAR TABLA */} 
         <Formik
-            initialValues={{ tableName: '' }}
+            key={selectedDB}
+            initialValues={{ tableName: '' , databaseName: selectedDB}}
             validate={values => {
                 const errors = {};
                 if (!values.tableName) {
@@ -313,8 +340,7 @@ function Dashboard() {
                 return errors;
             }}
             onSubmit={(values, { setSubmitting }) => {
-                // Handle table creation submission
-                console.log(values);
+                handleSubmitCrearTable(values);
                 setSubmitting(false);
             }}
         >
@@ -362,8 +388,8 @@ email VARCHAR(100)
             <p className="text-red-500">{message}</p>
           ) : (
             <ul className="max-w-md space-y-1 text-gray-500 list-disc list-inside">
-              {datatables.map((item) => (
-                <li key={item.dattable}>{item.dattable}</li>
+              {databaseName.map((item, index) => (
+                <li key={index}>{item}</li> // Usa el índice como clave si los elementos son únicos
               ))}
             </ul>
           )}

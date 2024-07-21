@@ -1,18 +1,13 @@
 import ply.yacc as yacc
 from lexer import tokens
 
-# Reglas de la gramática
-def p_start(p):
-    '''start : statements'''
-    p[0] = p[1]
-
 def p_statements(p):
     '''statements : statement
-                  | statement statements'''
+                  | statements statement'''
     if len(p) == 2:
         p[0] = [p[1]]
     else:
-        p[0] = [p[1]] + p[2]
+        p[0] = p[1] + [p[2]]
 
 def p_statement(p):
     '''statement : create_database
@@ -20,36 +15,59 @@ def p_statement(p):
                  | alter_database
                  | create_table
                  | insert_into
-                 | select_statement'''
+                 | select_from'''
     p[0] = p[1]
 
 def p_create_database(p):
     '''create_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON'''
-    p[0] = ('CREATE_DATABASE', p[3])
+    p[0] = {
+        'command': 'CREATE DATABASE',
+        'databaseName': p[3]
+    }
 
 def p_drop_database(p):
     '''drop_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON'''
-    p[0] = ('DROP_DATABASE', p[3])
+    p[0] = {
+        'command': 'DROP DATABASE',
+        'databaseName': p[3]
+    }
 
 def p_alter_database(p):
     '''alter_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON'''
-    p[0] = ('ALTER_DATABASE', p[3], p[6])
+    p[0] = {
+        'command': 'ALTER DATABASE',
+        'oldName': p[3],
+        'newName': p[6]
+    }
 
 def p_create_table(p):
-    '''create_table : SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON'''
-    p[0] = ('CREATE_TABLE', p[3], p[5])
+    '''create_table : SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN column_definitions RPAREN SEMICOLON'''
+    p[0] = {
+        'command': 'CREATE TABLE',
+        'tableName': p[3],
+        'columns': p[5]
+    }
 
-def p_columns(p):
-    '''columns : column
-               | column COMMA columns'''
+def p_column_definitions(p):
+    '''column_definitions : column_definition
+                          | column_definitions COMMA column_definition'''
     if len(p) == 2:
         p[0] = [p[1]]
     else:
-        p[0] = [p[1]] + p[3]
+        p[0] = p[1] + [p[3]]
 
-def p_column(p):
-    '''column : IDENTIFIER column_type constraints'''
-    p[0] = (p[1], p[2], p[3])
+def p_column_definition(p):
+    '''column_definition : IDENTIFIER column_type
+                         | IDENTIFIER column_type SQL_KEYWORD'''
+    column_def = {
+        'name': p[1],
+        'type': p[2]
+    }
+    if len(p) == 4 and p[3].upper() == 'NULL':
+        column_def['nullable'] = False
+    else:
+        column_def['nullable'] = True
+    p[0] = column_def
 
 def p_column_type(p):
     '''column_type : INT
@@ -58,70 +76,49 @@ def p_column_type(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = f'{p[1]}({p[3]})'
-
-def p_constraints(p):
-    '''constraints : constraint
-                   | constraint constraints
-                   | empty'''
-    if len(p) == 2:
-        p[0] = [p[1]]
-    elif len(p) == 3:
-        p[0] = [p[1]] + p[2]
-    else:
-        p[0] = []
-
-def p_constraint(p):
-    '''constraint : SQL_KEYWORD SQL_KEYWORD
-                  | SQL_KEYWORD'''
-    if len(p) == 3:
-        p[0] = f'{p[1]} {p[2]}'
-    else:
-        p[0] = p[1]
+        p[0] = f"VARCHAR({p[3]})"
 
 def p_insert_into(p):
-    '''insert_into : SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON'''
-    p[0] = ('INSERT_INTO', p[3], p[5], p[9])
+    '''insert_into : SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN column_list RPAREN SQL_KEYWORD LPAREN value_list RPAREN SEMICOLON'''
+    p[0] = {
+        'command': 'INSERT INTO',
+        'tableName': p[3],
+        'columns': p[5],
+        'values': p[9]
+    }
 
-def p_identifiers(p):
-    '''identifiers : IDENTIFIER
-                   | IDENTIFIER COMMA identifiers'''
+def p_column_list(p):
+    '''column_list : IDENTIFIER
+                   | column_list COMMA IDENTIFIER'''
     if len(p) == 2:
         p[0] = [p[1]]
     else:
-        p[0] = [p[1]] + p[3]
+        p[0] = p[1] + [p[3]]
 
-def p_values(p):
-    '''values : value
-              | value COMMA values'''
+def p_value_list(p):
+    '''value_list : value
+                  | value_list COMMA value'''
     if len(p) == 2:
         p[0] = [p[1]]
     else:
-        p[0] = [p[1]] + p[3]
+        p[0] = p[1] + [p[3]]
 
 def p_value(p):
     '''value : STRING
              | NUMBER'''
     p[0] = p[1]
 
-def p_select_statement(p):
-    '''select_statement : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON
-                        | SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON'''
-    if len(p) == 6:
-        p[0] = ('SELECT', '*', p[3])
-    else:
-        p[0] = ('SELECT', p[3], p[5])
-
-def p_empty(p):
-    'empty :'
-    p[0] = None
+def p_select_from(p):
+    '''select_from : SQL_KEYWORD SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON'''
+    p[0] = {
+        'command': 'SELECT * FROM',
+        'tableName': p[4]
+    }
 
 def p_error(p):
     print(f"Syntax error at '{p.value}'")
 
 parser = yacc.yacc()
 
-def pg_parser(tokens, page):
-    parser.error = 0
-    result = parser.parse(tokens)
-    return result
+def pg_parser(data):
+    return parser.parse(data)

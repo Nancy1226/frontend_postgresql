@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Formik } from 'formik';
 import Swal from "sweetalert2";
-import { createDB, getAllDB, getTable, selectDB } from "../api/routes";
+import { createDB, getAllDB, selectDB } from "../api/routes";
 import Title from "../components/atoms/Title";
 
 function Dashboard() {
@@ -10,8 +10,6 @@ function Dashboard() {
   const [Change, setChange] = useState(false);
   const [selectedDB, setSelectedDB] = useState(null);
   const [lexicalResults, setLexicalResults] = useState([]);
-  const [databases, setDatabases] = useState([]);
-  const [datatables, setDatatables] = useState([]);
 
 
   useEffect(() => {
@@ -19,30 +17,11 @@ function Dashboard() {
       try {
         const response = await getAllDB();
         if (response.data.databases) {
-          setDatabases(response.data.databases);
+          setDatos(response.data.databases);
           setMessage('');
         } else if (response.data.message) {
           setMessage(response.data.message);
-          setDatabases([]);
-        }
-      } catch (error) {
-        if (error.response) {
-          console.log(error.response.status);
-          console.log(error.response.data);
-        } else {
-          console.log(error.message);
-        }
-      }
-    }
-    async function obtenerTable() {
-      try {
-        const response = await getTable();
-        if (response.data.datatables) {
-          setDatatables(response.data.datatables);
-          setMessage('');
-        } else if (response.data.message) {
-          setMessage(response.data.message);
-          setDatatables([]);
+          setDatos([]);
         }
       } catch (error) {
         if (error.response) {
@@ -54,26 +33,27 @@ function Dashboard() {
       }
     }
     obtener();
-    obtenerTable();
   }, [Change]);
-  
-  
+
   const handleSubmitDatabase = async (values) => {
-  console.log(values)
     try {
-        const response = await createDB(values);
-        console.log('Imprimiendo response')
-        console.log(response.data)
-        console.log(response.status)
-    } catch (error) {
+      const response = await createDB(values);
+      if (response.status === 200) {
         Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Ocurrió un error al intentar crear la base de datos."
+          title: "Creado exitosamente",
+          text: "¡Base de datos creada!",
+          icon: "success"
         });
+      }
+      console.log(response.data)
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al intentar crear la base de datos."
+      });
     }
-};
-  
+  };
 
   const handleSubmitSelectDB = async (values) => {
     try {
@@ -162,7 +142,7 @@ function Dashboard() {
             <p className="text-red-500">{message}</p>
           ) : (
             <ul className="max-w-md space-y-1 text-gray-500 list-disc list-inside">
-              {databases.map((item) => (
+              {dato.map((item) => (
                 <li key={item.datname}>{item.datname}</li>
               ))}
             </ul>
@@ -170,80 +150,89 @@ function Dashboard() {
         </ul>
 
         <Formik
-          initialValues={{ sql: ''}}
-          validate={values => {
-            const errors = {};
-            if (!values.sql) {
-              errors.sql = 'Required';
-            } else {
-              // Validación personalizada para sql
-              const createRegex = /^CREATE DATABASE [a-zA-Z_]+;$/;
-              const dropRegex = /^DROP DATABASE [a-zA-Z_]+;$/;
-              const alterRegex = /^ALTER DATABASE [a-zA-Z_]+ RENAME TO [a-zA-Z_]+;$/;
+            initialValues={{ sql: '', tableName: '' }}
+            validate={values => {
+                const errors = {};
+                if (!values.sql) {
+                errors.sql = 'Required';
+                } else {
+                // Validación personalizada para sql
+                const createRegex = /^CREATE DATABASE [a-zA-Z_]+;$/;
+                const dropRegex = /^DROP DATABASE [a-zA-Z_]+;$/;
+                const alterRegex = /^ALTER DATABASE [a-zA-Z_]+ RENAME TO [a-zA-Z_]+;$/;
 
-              if (!createRegex.test(values.sql) && !dropRegex.test(values.sql) && !alterRegex.test(values.sql)) {
-                errors.sql = 'La sentencia SQL no cumple con el formato requerido.';
-              }
-            }
-            if (!values.tableName) {
-              errors.tableName = 'Required';
-            }
-            return errors;
-          }}
-          onSubmit={(values, { setSubmitting }) => {
-            handleSubmitDatabase(values);
-            setSubmitting(false);
-          }}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleChange,
-            handleBlur,
-            handleSubmit,
-            isSubmitting,
-          }) => (
-            <form onSubmit={handleSubmit}>
-              <div className="form-group mb-4">
-                <label htmlFor="sql" className="block text-gray-700 mt-4">Creación de base de datos</label>
-                <input
-                  type="text"
-                  name="sql"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.sql}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                  placeholder="CREATE DATABASE name_db;"
-                />
-                {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
-                <h4 className="mb-2 text-lg font-light text-gray-900">Sentencias aceptadas:</h4>
-                <ul className="max-w-md space-y-1 text-gray-500 list-inside dark:text-gray-400">
-                  <li className="flex items-center">
-                    <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                    </svg>
-                    CREATE DATABASE name_db;
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                    </svg>
-                    DROP DATABASE name_db;
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                    </svg>
-                    ALTER DATABASE name_db RENAME TO name_db; 
-                  </li>
-                </ul>
-              </div>
-              <div className="form-group mb-6 text-left">
-                <button type="submit" disabled={isSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Crear</button>
-              </div>
-            </form>
-          )}
+                if (!createRegex.test(values.sql) && !dropRegex.test(values.sql) && !alterRegex.test(values.sql)) {
+                    errors.sql = 'La sentencia SQL no cumple con el formato requerido.';
+                }
+                }
+                if (!values.tableName) {
+                errors.tableName = 'Required';
+                }
+                return errors;
+            }}
+            onSubmit={(values, { setSubmitting }) => {
+                if (!selectedDB) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Debe seleccionar una base de datos antes de crear una tabla."
+                });
+                setSubmitting(false);
+                return;
+                }
+                handleSubmitDatabase(values);
+                setSubmitting(false);
+            }}
+            >
+            {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                isSubmitting,
+            }) => (
+                <form onSubmit={handleSubmit}>
+                <div className="form-group mb-4">
+                    <label htmlFor="sql" className="block text-gray-700 mt-4">Creación de base de datos</label>
+                    <input
+                    type="text"
+                    name="sql"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.sql}
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    placeholder="CREATE DATABASE name_db;"
+                    />
+                    {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
+                    <h4 className="mb-2 text-lg font-light text-gray-900">Sentencias aceptadas:</h4>
+                    <ul className="max-w-md space-y-1 text-gray-500 list-inside dark:text-gray-400">
+                    <li className="flex items-center">
+                        <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                        </svg>
+                        CREATE DATABASE name_db;
+                    </li>
+                    <li className="flex items-center">
+                        <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                        </svg>
+                        DROP DATABASE name_db;
+                    </li>
+                    <li className="flex items-center">
+                        <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                        </svg>
+                        ALTER DATABASE name_db RENAME TO name_db; 
+                    </li>
+                    </ul>
+                </div>
+                <div className="form-group mb-6 text-left">
+                    <button type="submit" disabled={isSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Crear</button>
+                </div>
+                </form>
+            )}
         </Formik>
 
         <Formik
@@ -356,18 +345,7 @@ email VARCHAR(100)
             )}
         </Formik>
 
-        <h2 className="mb-2 text-lg font-semibold text-gray-900">Tablas creadas</h2>
-        <ul className="max-w-md space-y-1 text-gray-500 list-disc list-inside">
-          {message ? (
-            <p className="text-red-500">{message}</p>
-          ) : (
-            <ul className="max-w-md space-y-1 text-gray-500 list-disc list-inside">
-              {datatables.map((item) => (
-                <li key={item.dattable}>{item.dattable}</li>
-              ))}
-            </ul>
-          )}
-        </ul>
+
 
         {/* Formulario para inserción de datos */}
         <Formik

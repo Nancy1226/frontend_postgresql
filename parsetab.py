@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'COMMA IDENTIFIER INT IP LPAREN NUMBER PASSWORD PORT RPAREN SEMICOLON SQL_KEYWORD STRING USERNAME VALUES VARCHARstart : statementsstatements : statement\n                  | statement statementsstatement : create_database\n                 | drop_database\n                 | alter_database\n                 | create_table\n                 | insert_into\n                 | select_statementcreate_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLONdrop_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLONalter_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLONcreate_table : SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLONcolumns : column\n               | column COMMA columnscolumn : IDENTIFIER column_type constraintscolumn_type : INT\n                   | VARCHAR LPAREN NUMBER RPAREN\n                   | SQL_KEYWORDconstraints : constraint\n                   | constraint constraints\n                   | emptyconstraint : SQL_KEYWORD SQL_KEYWORD\n                  | SQL_KEYWORDinsert_into : SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLONidentifiers : IDENTIFIER\n                   | IDENTIFIER COMMA identifiersvalues : value\n              | value COMMA valuesvalue : STRING\n             | NUMBERselect_statement : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON\n                        | SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLONempty :'
+_lr_signature = 'COMMA IDENTIFIER ILLEGAL INT LPAREN NUMBER RPAREN SEMICOLON SQL_KEYWORD STRING VARCHARstatements : statement\n                  | statements statementstatement : create_database\n                 | drop_database\n                 | alter_database\n                 | create_table\n                 | insert_into\n                 | select_fromcreate_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLONdrop_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLONalter_database : SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLONcreate_table : SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN column_definitions RPAREN SEMICOLONcolumn_definitions : column_definition\n                          | column_definitions COMMA column_definitioncolumn_definition : IDENTIFIER column_type\n                         | IDENTIFIER column_type SQL_KEYWORDcolumn_type : INT\n                   | VARCHAR LPAREN NUMBER RPAREN\n                   | SQL_KEYWORDinsert_into : SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN column_list RPAREN SQL_KEYWORD LPAREN value_list RPAREN SEMICOLONcolumn_list : IDENTIFIER\n                   | column_list COMMA IDENTIFIERvalue_list : value\n                  | value_list COMMA valuevalue : STRING\n             | NUMBERselect_from : SQL_KEYWORD SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON'
     
-_lr_action_items = {'SQL_KEYWORD':([0,3,4,5,6,7,8,9,10,13,14,15,16,22,26,27,30,31,32,34,36,38,39,41,43,45,48,50,53,60,],[10,10,-4,-5,-6,-7,-8,-9,12,15,19,20,-10,34,-26,-27,-32,43,-17,-19,46,-33,-12,43,50,-13,34,-23,-18,-25,]),'$end':([1,2,3,4,5,6,7,8,9,11,16,30,38,39,45,60,],[0,-1,-2,-4,-5,-6,-7,-8,-9,-3,-10,-32,-33,-12,-13,-25,]),'IDENTIFIER':([12,15,17,18,19,20,37,],[13,21,22,26,28,29,48,]),'SEMICOLON':([13,21,28,29,35,58,],[16,30,38,39,45,60,]),'LPAREN':([13,33,46,],[17,44,52,]),'COMMA':([13,22,25,26,31,32,34,40,41,42,43,49,50,53,55,56,57,],[18,18,37,18,-34,-17,-19,-16,-20,-22,-24,-21,-23,-18,59,-30,-31,]),'RPAREN':([22,23,24,25,26,27,31,32,34,40,41,42,43,47,49,50,51,53,54,55,56,57,61,],[-26,35,36,-14,-26,-27,-34,-17,-19,-16,-20,-22,-24,-15,-21,-23,53,-18,58,-28,-30,-31,-29,]),'INT':([22,48,],[32,32,]),'VARCHAR':([22,48,],[33,33,]),'NUMBER':([44,52,59,],[51,57,57,]),'STRING':([52,59,],[56,56,]),}
+_lr_action_items = {'SQL_KEYWORD':([0,1,2,3,4,5,6,7,8,9,10,11,13,15,16,18,20,25,26,27,31,33,36,38,43,50,],[9,9,-1,-3,-4,-5,-6,-7,-8,11,-2,12,15,19,-9,-27,26,34,-19,-17,39,-11,-12,26,-18,-20,]),'$end':([1,2,3,4,5,6,7,8,10,16,18,33,36,50,],[0,-1,-3,-4,-5,-6,-7,-8,-2,-9,-27,-11,-12,-20,]),'IDENTIFIER':([11,12,17,19,30,32,],[13,14,20,24,38,40,]),'SEMICOLON':([13,14,24,29,48,],[16,18,33,36,50,]),'LPAREN':([13,28,39,],[17,35,42,]),'RPAREN':([20,21,22,23,25,26,27,34,37,40,41,43,44,45,46,47,51,],[-21,29,31,-13,-15,-19,-17,-16,-14,-22,43,-18,48,-23,-25,-26,-24,]),'COMMA':([20,21,22,23,25,26,27,34,37,40,43,44,45,46,47,51,],[-21,30,32,-13,-15,-19,-17,-16,-14,-22,-18,49,-23,-25,-26,-24,]),'INT':([20,38,],[27,27,]),'VARCHAR':([20,38,],[28,28,]),'NUMBER':([35,42,49,],[41,47,47,]),'STRING':([42,49,],[46,46,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'start':([0,],[1,]),'statements':([0,3,],[2,11,]),'statement':([0,3,],[3,3,]),'create_database':([0,3,],[4,4,]),'drop_database':([0,3,],[5,5,]),'alter_database':([0,3,],[6,6,]),'create_table':([0,3,],[7,7,]),'insert_into':([0,3,],[8,8,]),'select_statement':([0,3,],[9,9,]),'identifiers':([12,17,18,],[14,24,27,]),'columns':([17,37,],[23,47,]),'column':([17,37,],[25,25,]),'column_type':([22,48,],[31,31,]),'constraints':([31,41,],[40,49,]),'constraint':([31,41,],[41,41,]),'empty':([31,41,],[42,42,]),'values':([52,59,],[54,61,]),'value':([52,59,],[55,55,]),}
+_lr_goto_items = {'statements':([0,],[1,]),'statement':([0,1,],[2,10,]),'create_database':([0,1,],[3,3,]),'drop_database':([0,1,],[4,4,]),'alter_database':([0,1,],[5,5,]),'create_table':([0,1,],[6,6,]),'insert_into':([0,1,],[7,7,]),'select_from':([0,1,],[8,8,]),'column_definitions':([17,],[21,]),'column_list':([17,],[22,]),'column_definition':([17,30,],[23,37,]),'column_type':([20,38,],[25,25,]),'value_list':([42,],[44,]),'value':([42,49,],[45,51,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -26,39 +26,32 @@ for _k, _v in _lr_goto_items.items():
        _lr_goto[_x][_k] = _y
 del _lr_goto_items
 _lr_productions = [
-  ("S' -> start","S'",1,None,None,None),
-  ('start -> statements','start',1,'p_start','parser.py',6),
-  ('statements -> statement','statements',1,'p_statements','parser.py',10),
-  ('statements -> statement statements','statements',2,'p_statements','parser.py',11),
-  ('statement -> create_database','statement',1,'p_statement','parser.py',18),
-  ('statement -> drop_database','statement',1,'p_statement','parser.py',19),
-  ('statement -> alter_database','statement',1,'p_statement','parser.py',20),
-  ('statement -> create_table','statement',1,'p_statement','parser.py',21),
-  ('statement -> insert_into','statement',1,'p_statement','parser.py',22),
-  ('statement -> select_statement','statement',1,'p_statement','parser.py',23),
-  ('create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON','create_database',4,'p_create_database','parser.py',27),
-  ('drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON','drop_database',4,'p_drop_database','parser.py',31),
-  ('alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON','alter_database',7,'p_alter_database','parser.py',35),
-  ('create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN columns RPAREN SEMICOLON','create_table',7,'p_create_table','parser.py',39),
-  ('columns -> column','columns',1,'p_columns','parser.py',43),
-  ('columns -> column COMMA columns','columns',3,'p_columns','parser.py',44),
-  ('column -> IDENTIFIER column_type constraints','column',3,'p_column','parser.py',51),
-  ('column_type -> INT','column_type',1,'p_column_type','parser.py',55),
-  ('column_type -> VARCHAR LPAREN NUMBER RPAREN','column_type',4,'p_column_type','parser.py',56),
-  ('column_type -> SQL_KEYWORD','column_type',1,'p_column_type','parser.py',57),
-  ('constraints -> constraint','constraints',1,'p_constraints','parser.py',64),
-  ('constraints -> constraint constraints','constraints',2,'p_constraints','parser.py',65),
-  ('constraints -> empty','constraints',1,'p_constraints','parser.py',66),
-  ('constraint -> SQL_KEYWORD SQL_KEYWORD','constraint',2,'p_constraint','parser.py',75),
-  ('constraint -> SQL_KEYWORD','constraint',1,'p_constraint','parser.py',76),
-  ('insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN identifiers RPAREN SQL_KEYWORD LPAREN values RPAREN SEMICOLON','insert_into',11,'p_insert_into','parser.py',83),
-  ('identifiers -> IDENTIFIER','identifiers',1,'p_identifiers','parser.py',87),
-  ('identifiers -> IDENTIFIER COMMA identifiers','identifiers',3,'p_identifiers','parser.py',88),
-  ('values -> value','values',1,'p_values','parser.py',95),
-  ('values -> value COMMA values','values',3,'p_values','parser.py',96),
-  ('value -> STRING','value',1,'p_value','parser.py',103),
-  ('value -> NUMBER','value',1,'p_value','parser.py',104),
-  ('select_statement -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD IDENTIFIER SEMICOLON','select_statement',6,'p_select_statement','parser.py',108),
-  ('select_statement -> SQL_KEYWORD SQL_KEYWORD identifiers SQL_KEYWORD IDENTIFIER SEMICOLON','select_statement',6,'p_select_statement','parser.py',109),
-  ('empty -> <empty>','empty',0,'p_empty','parser.py',116),
+  ("S' -> statements","S'",1,None,None,None),
+  ('statements -> statement','statements',1,'p_statements','parser.py',5),
+  ('statements -> statements statement','statements',2,'p_statements','parser.py',6),
+  ('statement -> create_database','statement',1,'p_statement','parser.py',13),
+  ('statement -> drop_database','statement',1,'p_statement','parser.py',14),
+  ('statement -> alter_database','statement',1,'p_statement','parser.py',15),
+  ('statement -> create_table','statement',1,'p_statement','parser.py',16),
+  ('statement -> insert_into','statement',1,'p_statement','parser.py',17),
+  ('statement -> select_from','statement',1,'p_statement','parser.py',18),
+  ('create_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON','create_database',4,'p_create_database','parser.py',22),
+  ('drop_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON','drop_database',4,'p_drop_database','parser.py',29),
+  ('alter_database -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON','alter_database',7,'p_alter_database','parser.py',36),
+  ('create_table -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN column_definitions RPAREN SEMICOLON','create_table',7,'p_create_table','parser.py',44),
+  ('column_definitions -> column_definition','column_definitions',1,'p_column_definitions','parser.py',52),
+  ('column_definitions -> column_definitions COMMA column_definition','column_definitions',3,'p_column_definitions','parser.py',53),
+  ('column_definition -> IDENTIFIER column_type','column_definition',2,'p_column_definition','parser.py',60),
+  ('column_definition -> IDENTIFIER column_type SQL_KEYWORD','column_definition',3,'p_column_definition','parser.py',61),
+  ('column_type -> INT','column_type',1,'p_column_type','parser.py',73),
+  ('column_type -> VARCHAR LPAREN NUMBER RPAREN','column_type',4,'p_column_type','parser.py',74),
+  ('column_type -> SQL_KEYWORD','column_type',1,'p_column_type','parser.py',75),
+  ('insert_into -> SQL_KEYWORD SQL_KEYWORD IDENTIFIER LPAREN column_list RPAREN SQL_KEYWORD LPAREN value_list RPAREN SEMICOLON','insert_into',11,'p_insert_into','parser.py',82),
+  ('column_list -> IDENTIFIER','column_list',1,'p_column_list','parser.py',91),
+  ('column_list -> column_list COMMA IDENTIFIER','column_list',3,'p_column_list','parser.py',92),
+  ('value_list -> value','value_list',1,'p_value_list','parser.py',99),
+  ('value_list -> value_list COMMA value','value_list',3,'p_value_list','parser.py',100),
+  ('value -> STRING','value',1,'p_value','parser.py',107),
+  ('value -> NUMBER','value',1,'p_value','parser.py',108),
+  ('select_from -> SQL_KEYWORD SQL_KEYWORD SQL_KEYWORD IDENTIFIER SEMICOLON','select_from',5,'p_select_from','parser.py',112),
 ]

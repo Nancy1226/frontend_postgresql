@@ -1,10 +1,6 @@
 import ply.lex as lex
 
 tokens = (
-    'IP',
-    'USERNAME',
-    'PASSWORD',
-    'PORT',
     'SQL_KEYWORD',
     'IDENTIFIER',
     'SEMICOLON',
@@ -13,27 +9,12 @@ tokens = (
     'RPAREN',
     'INT',
     'VARCHAR',
-    'VALUES',
     'STRING',
-    'NUMBER'
+    'NUMBER',
+    'DIGIT',    # Añadir token para dígito
+    'ID',       # Añadir token para id
+    'ILLEGAL'   # Añadir un token para caracteres ilegales
 )
-
-# Definir reglas de tokens para cada página
-def t_IP(t):
-    r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'
-    return t
-
-def t_USERNAME(t):
-    r'\b[a-zA-Z0-9_]+\b'
-    return t
-
-def t_PASSWORD(t):
-    r'\b[a-zA-Z0-9_]+\b'
-    return t
-
-def t_PORT(t):
-    r'\b\d+\b'
-    return t
 
 # Palabras reservadas de SQL
 reserved = {
@@ -46,7 +27,7 @@ reserved = {
     'TABLE': 'SQL_KEYWORD',
     'INSERT': 'SQL_KEYWORD',
     'INTO': 'SQL_KEYWORD',
-    'VALUES': 'VALUES',
+    'VALUES': 'SQL_KEYWORD',
     'SELECT': 'SQL_KEYWORD',
     'FROM': 'SQL_KEYWORD',
     'INT': 'INT',
@@ -59,8 +40,8 @@ reserved = {
 }
 
 def t_IDENTIFIER(t):
-    r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
-    t.type = reserved.get(t.value, 'IDENTIFIER')
+    r'[a-zA-Z_][a-zA-Z0-9_]*'
+    t.type = reserved.get(t.value.upper(), 'ID')  # Cambiar IDENTIFIER a ID
     return t
 
 t_SEMICOLON = r';'
@@ -72,6 +53,16 @@ t_STRING = r'\'[^\']*\''
 def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)
+    if len(str(t.value)) == 1:  # Si el número tiene un solo dígito
+        t.type = 'DIGIT'
+    else:
+        t.type = 'NUMBER'
+    return t
+
+# Define un token para caracteres ilegales
+def t_ILLEGAL(t):
+    r'.'
+    t.type = 'ILLEGAL'
     return t
 
 t_ignore = ' \t\n'
@@ -82,7 +73,7 @@ def t_error(t):
 
 lexer = lex.lex()
 
-def pg_lexer(data, page):
+def pg_lexer(data):
     lexer.input(data)
     tokens = []
     while True:

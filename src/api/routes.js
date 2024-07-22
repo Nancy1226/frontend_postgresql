@@ -49,6 +49,7 @@ export const selectTable = async(valores) =>{
 
 //Ruta para el python
 export const analizePython = async(sql) =>{
-    // return await axios.post('http://localhost:3000/api/select-operation', valores);
-    return await axios.post('http://127.0.0.1:5000/analyze', { query: sql });
+    // return await axios.post('http://127.0.0.1:5000/analyze', { query: sql });
+    return await axios.post('http://34.196.138.126:5000/analyze', { query: sql });
+    
 }

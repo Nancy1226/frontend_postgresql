@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Formik } from 'formik';
 import Swal from "sweetalert2";
-import { createDB, getAllDB, getTable, selectDB, createTable, insertTabla } from "../api/routes";
-import Title from "../components/atoms/Title";
 import axios from "axios";
+import { createDB, getAllDB, getTable, selectDB, createTable, insertTabla, selectTable, analizePython } from "../api/routes";
+import Title from "../components/atoms/Title";
 
 function Dashboard() {
   const [selectedDB, setSelectedDB] = useState("postgres"); // Inicializamos con la base de datos predefinida
@@ -13,6 +13,7 @@ function Dashboard() {
   const [message, setMessage] = useState('');
   const [shouldFetchTables, setShouldFetchTables] = useState(false);
   const [shouldFetchDatabases, setShouldFetchDatabases] = useState(false);
+  const [selectTables, setSelectTables] = useState([]);
 
   useEffect(() => {
     if (selectedDB && setShouldFetchDatabases) {
@@ -38,7 +39,13 @@ function Dashboard() {
         setMessage(response.data.message);
         setDatabases([]);
       }
+      console.log("imprimiendo el response ",response.data)
     } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "No se pudo realizar la operacion!"
+      });
       console.error('Error fetching databases:', error);
       setMessage('Error al obtener las bases de datos');
     }
@@ -52,14 +59,20 @@ function Dashboard() {
       } else if (response.data.message) {
         setTables([]);
       }
+      console.log("imprimiendo el response ",response.data )
     } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al intentar ejecutar la sentencia!."
+    });
       console.error('Error fetching tables:', error);
       setMessage('Error al obtener las tablas');
     }
   };
 
   // CREACION DE LA BASE DE DATOS
-  const handleSubmitDatabase = async (values) => {
+  const handleSubmitDatabase = async (values, {setSubmitting}) => {
     try {
         const response = await createDB(values);
         if(response.status == 200){
@@ -70,42 +83,48 @@ function Dashboard() {
           });
           setShouldFetchDatabases(true); // Indica que se deben obtener las tablas después de crear una nueva
         }
-          console.log('Imprimiendo response')
-        console.log(response.data)
-        console.log(response.status)
-
+        console.log('imprimiendo response ', response.data)
     } catch (error) {
         Swal.fire({
             icon: "error",
             title: "Error",
-            text: "Ocurrió un error al intentar crear la base de datos."
+            text: "Ocurrió un error al intentar ejecutar la sentencia!."
         });
+    }finally {
+      setSubmitting(false); // Restablece isSubmitting a false
     }
 };
 
   
 // SELECCION DE LA BASE DE DATOS
   const handleSubmitSelectDB = async (values) => {
-    console.log(values)
+    console.log(values);
     try {
       const response = await selectDB(values);
-    if (response.data.message.includes('éxito')) {
-      setSelectedDB(values.databaseName);
-      Swal.fire({
-        title: "Seleccionado exitosamente!",
-        text: "Se ha seleccionado exitosamente la base de datos!",
-        icon: "success"
-      });
-      setShouldFetchTables(true);
-    }
+      if (response.data.message.includes('éxito')) {
+        setSelectedDB(values.databaseName);
+        console.log('Base de datos seleccionada:', values.databaseName);
+        Swal.fire({
+          title: "¡Seleccionado exitosamente!",
+          text: "¡Se ha seleccionado exitosamente la base de datos!",
+          icon: "success"
+        });
+        setShouldFetchTables(true);
+      }
     } catch (error) {
-      console.log(error)
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al intentar seleccionar la base de datos."
+      });
+      console.error(error);
     }
   };
 
   const handleSubmitCrearTable = async (values) => {
+    console.log(values)
     try {
-      const response = await axios.post('http://34.239.194.240:3000/api/table', values);
+      const response = await createTable(values);
       if (response.status == 200) {
         Swal.fire({
           title: "¡Operacion ejecutado exitosamente!",
@@ -114,135 +133,162 @@ function Dashboard() {
         });
         setShouldFetchTables(true); // Indica que se deben obtener las tablas después de crear una nueva
       } else {
-        setMessage(response.data.message || 'Error al crear la tabla');
+        setMessage(response.data.message || 'Error al ejecutar la operación');
       }
+      console.log('imprimiendo response ', response.data)
     } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al intentar ejecutar la sentencia!."
+    });
       console.error('Error creating table:', error);
-      setMessage('Error al crear la tabla');
+      setMessage('Error al ejecutar la sentencia');
     }
   };
   
-  const handleSubmitInserccionTable = async (values) => {
+  const handleSubmitInserccionTable = async (values, {setSubmitting}) => {
     try {
       const response = await insertTabla(values);
-      console.log('errorrrrrrrrr', response.data)
+      if (response.status == 200) {
+        Swal.fire({
+          title: "¡Operacion ejecutado exitosamente!",
+          text: "¡Se ha ejecutado exitosamente la sentencia!",
+          icon: "success"
+        });
+      }else{
+        setMessage(response.data.message || 'Error al ejecutar la operación');
+      }
+      console.log('imprimiendo response ', response.data)
     } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al intentar ejecutar la sentencia!."
+    });
       console.error('Error inserction the table:', error);
       setMessage('Error al crear la operacion o inserccion');
+    }finally {
+      setSubmitting(false); // Restablece isSubmitting a false
     }
   };
 
-  const fetchLexicalResults = async () => {
-    if (!selectedDB) {
-        return;
-    }
+  const handleSubmitSelectTable = async (values, {setSubmitting}) => {
     try {
-        const response = await fetch('http://127.0.0.1:5000/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query: 'YOUR_SQL_QUERY_HERE' }), // Cambia esto a una consulta SQL real
+      const response = await selectTable(values); // Asegúrate de que esta función esté correctamente definida
+      if (response.status === 200) {
+        Swal.fire({
+          title: "¡Operación ejecutada exitosamente!",
+          text: "¡Se ha ejecutado exitosamente la sentencia!",
+          icon: "success"
         });
-        const data = await response.json();
-        setLexicalResults(data.tokens);
+        setSelectTables(response.data);
+        setMessage('');
+      } else {
+        setMessage(response.data.message || 'No hay ningún registro');
+      }
+      console.log('imprimiendo response', response.data);
     } catch (error) {
-        console.error('Error fetching lexical results:', error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al intentar ejecutar la sentencia!."
+    });
+      console.error('Error al seleccionar la tabla:', error);
+      setMessage('Error al crear la operación o inserción');
+    }finally {
+      setSubmitting(false); // Restablece isSubmitting a false
     }
-};
+  };
 
-  useEffect(() => {
-    fetchLexicalResults();
-  }, [selectedDB]);
+  const performLexicalAnalysis = async (sql) => {
+    try {
+      const response = await analizePython(sql);
+      return response.data.tokens;
+    } catch (error) {
+      console.error('Error performing lexical analysis:', error);
+      return [];
+    }
+  };
   
   const renderLexicalResultsTable = () => {
     if (lexicalResults.length === 0) {
-        return <p>No lexical results to display.</p>;
+      return <p>No hay resultados léxicos para mostrar.</p>;
     }
     return (
-        <table className="min-w-full bg-white border border-gray-300">
-            <thead>
-                <tr>
-                    <th className="py-2 px-4 border-b">Token</th>
-                    <th className="py-2 px-4 border-b">Type</th>
-                </tr>
-            </thead>
-            <tbody>
-                {lexicalResults.map((result, index) => (
-                    <tr key={index}>
-                        <td className="py-2 px-4 border-b">{result.token}</td>
-                        <td className="py-2 px-4 border-b">{result.type}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+      <table className="min-w-full bg-white border border-gray-300">
+        <thead>
+          <tr>
+            <th className="py-2 px-4 border-b">Token</th>
+            <th className="py-2 px-4 border-b">Tipo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lexicalResults.map((result, index) => (
+            <tr key={index}>
+              <td className="py-2 px-4 border-b">{result.token}</td>
+              <td className="py-2 px-4 border-b">{result.type}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
-};
+  };
 
   return (
-    <div className="bg-gray-100 flex justify-center items-center min-h-screen">
-      <div className="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md">
-        <Title msn={"Generador de base de datos"} />
+    <div className="bg-gray-100 flex justify-center items-center min-h-screen p-4">
+      <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-lg">
+        <Title msn={"Generador de base de datos"} className="mb-6 text-2xl font-bold text-gray-800" />
 
-        <h2 className="mb-2 text-lg font-semibold text-gray-900">Bases de datos creadas</h2>
-        <ul className="max-w-md space-y-1 text-gray-500 list-disc list-inside">
-          {message ? (
-            <p className="text-red-500">{message}</p>
-          ) : (
-            <ul className="max-w-md space-y-1 text-gray-500 list-disc list-inside">
-              {databases.map((item) => (
-                <li key={item.datname}>{item.datname}</li>
-              ))}
-            </ul>
-          )}
-        </ul>
-                    {/* CREACION DE LA BASE DE DATOS */}
-        <Formik
-          initialValues={{ sql: ''}}
-          validate={values => {
-            const errors = {};
-            if (!values.sql) {
-              errors.sql = 'Required';
-            } else {
-              // Validación personalizada para sql
-              const createRegex = /^CREATE DATABASE [a-zA-Z_]+;$/;
-              const dropRegex = /^DROP DATABASE [a-zA-Z_]+;$/;
-              const alterRegex = /^ALTER DATABASE [a-zA-Z_]+ RENAME TO [a-zA-Z_]+;$/;
+        <section className="mb-8 bg-gray-50 p-6 rounded-lg shadow-inner">
+          <h3 className="mb-4 text-lg font-medium text-gray-900">Base de Datos</h3>
+          <Formik
+            initialValues={{ sql: '' }}
+            validate={values => {
+              const errors = {};
+              if (!values.sql) {
+                errors.sql = 'Requerido';
+              } else {
+                const createRegex = /^CREATE DATABASE [a-zA-Z_]+;$/;
+                const dropRegex = /^DROP DATABASE [a-zA-Z_]+;$/;
+                const alterRegex = /^ALTER DATABASE [a-zA-Z_]+ RENAME TO [a-zA-Z_]+;$/;
 
-              if (!createRegex.test(values.sql) && !dropRegex.test(values.sql) && !alterRegex.test(values.sql)) {
-                errors.sql = 'La sentencia SQL no cumple con el formato requerido.';
+                if (!createRegex.test(values.sql) && !dropRegex.test(values.sql) && !alterRegex.test(values.sql)) {
+                  errors.sql = 'La sentencia SQL no cumple con el formato requerido.';
+                }
               }
-            }
-            
-            return errors;
-          }}
-          onSubmit={(values) => {
-            handleSubmitDatabase(values);
-          }}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleChange,
-            handleBlur,
-            handleSubmit,
-            isSubmitting,
-          }) => (
-            <form onSubmit={handleSubmit}>
-              <div className="form-group mb-4">
-                <label htmlFor="sql" className="block text-gray-700 mt-4">Creación de base de datos</label>
-                <input
-                  type="text"
-                  name="sql"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.sql}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                  placeholder="CREATE DATABASE name_db;"
-                />
-                {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
-                <h4 className="mb-2 text-lg font-light text-gray-900">Sentencias aceptadas:</h4>
+              return errors;
+            }}
+            onSubmit={async (values, { setSubmitting }) => {
+              console.log(values)
+              const lexicalResults = await performLexicalAnalysis(values.sql);
+              setLexicalResults(lexicalResults);
+              handleSubmitDatabase(values, { setSubmitting });
+            }}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              isSubmitting,
+            }) => (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="sql" className="block text-gray-700">Sentencia SQL</label>
+                  <input
+                    type="text"
+                    name="sql"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.sql}
+                    className="mt-1 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    placeholder="CREATE DATABASE name_db;"
+                  />
+                  {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
+                  <h4 className="mb-2 mt-2 text-lg font-light text-gray-900">Sentencias aceptadas:</h4>
                 <ul className="max-w-md space-y-1 text-gray-500 list-inside dark:text-gray-400">
                   <li className="flex items-center">
                     <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -263,116 +309,133 @@ function Dashboard() {
                     ALTER DATABASE name_db RENAME TO name_db; 
                   </li>
                 </ul>
-              </div>
-              <div className="form-group mb-6 text-left">
-                <button type="submit" disabled={isSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Crear</button>
-              </div>
-            </form>
-          )}
-        </Formik>
-        {/* SELECCION DE LA BASE DE DATOS */}
-        <Formik
+                </div>
+                <div className="text-left">
+                  <button type="submit" disabled={isSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Ejecutar</button>
+                </div>
+              </form>
+            )}
+          </Formik>
+        </section>
+
+      <section className="mb-8">
+         <h2 className="mb-4 text-xl font-semibold text-gray-900">Bases de datos creadas</h2>
+        {message ? (
+          <p className="text-red-500">{message}</p>
+        ) : (
+          <ul className="max-w-md space-y-1 text-gray-700 list-disc list-inside">
+            {databases.map((item) => (
+               <li key={item.datname} className="pl-2">{item.datname}</li>
+            ))}
+           </ul>
+        )}
+       </section>
+
+        <div className="mb-8 bg-gray-50 p-6 rounded-lg shadow-inner">
+          <h3 className="mb-4 text-lg font-medium text-gray-900">Seleccionar Base de Datos</h3>
+          <Formik
             initialValues={{ databaseName: '' }}
             validate={values => {
-                const errors = {};
-                if (!values.databaseName) {
-                errors.databaseName = 'Required';
-                } else {
-                // Validación personalizada para databaseName
-                const regex = /^[a-zA-Z_]+$/;  // Solo letras y guion bajo (_) permitidos
+              const errors = {};
+              if (!values.databaseName) {
+                errors.databaseName = 'Requerido';
+              } else {
+                const regex = /^[a-zA-Z_]+$/;
                 if (!regex.test(values.databaseName)) {
-                    errors.databaseName = 'Solo se permiten letras y guion bajo (_).';
+                  errors.databaseName = 'Solo se permiten letras y guion bajo (_).';
                 }
-                }
-                return errors;
+              }
+              return errors;
             }}
-            onSubmit={(values, { setSubmitting }) => {
+            onSubmit={async (values) => {
+              const lexicalResults = await performLexicalAnalysis(values.databaseName);
+              setLexicalResults(lexicalResults);
                 handleSubmitSelectDB(values);
-                setSubmitting(false);
             }}
-            >
+          >
             {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                isSubmitting,
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              isSubmitting,
             }) => (
-                <form onSubmit={handleSubmit}>
-                <div className="form-group mb-4">
-                    <label htmlFor="databaseName" className="block text-gray-700 mt-4">Selección de base de datos</label>
-                    <input
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="databaseName" className="block text-gray-700">Nombre de la Base de Datos</label>
+                  <input
                     type="text"
                     name="databaseName"
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values.databaseName}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    className="mt-1 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     placeholder="name_db"
-                    />
-                    {errors.databaseName && touched.databaseName && <div className="text-red-500">{errors.databaseName}</div>}
+                  />
+                  {errors.databaseName && touched.databaseName && <div className="text-red-500">{errors.databaseName}</div>}
                 </div>
-                <div className="form-group mb-6 text-left">
-                    <button type="submit" disabled={isSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Seleccionar</button>
+                <div className="text-left">
+                  <button type="submit" disabled={isSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Seleccionar</button>
                 </div>
-                </form>
+              </form>
             )}
-        </Formik>
+          </Formik>
+        </div>
 
-        {/* CREAR TABLA */} 
-        <Formik
-            initialValues={{ sql: '' , databaseName: selectedDB}}
+        <div className="mb-8 bg-gray-50 p-6 rounded-lg shadow-inner">
+          <h3 className="mb-4 text-lg font-medium text-gray-900">Tabla</h3>
+          <Formik
+            initialValues={{ sql: '', databaseName: selectedDB }}
+            enableReinitialize={true}
             validate={values => {
               const errors = {};
               if (!values.sql) {
-                  errors.sql = 'Required';
+                errors.sql = 'Requerido';
               } else {
-                  // Regex para validar CREATE TABLE
-                  const createTableRegex = /^CREATE TABLE [a-zA-Z_]+\s*\(\s*(?:[a-zA-Z_]+\s+(?:SERIAL|INT|VARCHAR\(\d+\)|TIMESTAMP(?: DEFAULT CURRENT_TIMESTAMP)?)(?:\s+(?:PRIMARY KEY|NOT NULL))?,?\s*)+\);$/;
-          
-                  // Regex para validar DROP TABLE
-                  const dropTableRegex = /^DROP TABLE [a-zA-Z_]+;$/;
-          
-                  // Regex para validar ALTER DATABASE RENAME
-                  const alterDatabaseRegex = /^ALTER DATABASE [a-zA-Z_]+ RENAME TO [a-zA-Z_]+;$/;
-          
-                  // Validación general
-                  if (!createTableRegex.test(values.sql) && !dropTableRegex.test(values.sql) && !alterDatabaseRegex.test(values.sql)) {
-                      errors.sql = 'La sentencia SQL no cumple con el formato requerido.';
-                  }
+                const createTableRegex = /^CREATE TABLE [a-zA-Z_]+\s*\(\s*(?:[a-zA-Z_]+\s+(?:SERIAL|INT|VARCHAR\(\d+\)|TIMESTAMP(?: DEFAULT CURRENT_TIMESTAMP)?)(?:\s+(?:PRIMARY KEY|NOT NULL))?,?\s*)+\);$/;
+                const dropTableRegex = /^DROP TABLE [a-zA-Z_]+;$/;
+                const alterDatabaseRegex = /^ALTER TABLE [a-zA-Z_]+ RENAME TO [a-zA-Z_]+;$/;
+
+                if (!createTableRegex.test(values.sql) && !dropTableRegex.test(values.sql) && !alterDatabaseRegex.test(values.sql)) {
+                  errors.sql = 'La sentencia SQL no cumple con el formato requerido.';
+                }
               }
               return errors;
-          }}          
-            onSubmit={async (values, { setSubmitting }) => {
+            }}
+            onSubmit={async (values, ) => {
+              const lexicalResults = await performLexicalAnalysis(values.sql);
+              setLexicalResults(lexicalResults);
               await handleSubmitCrearTable(values);
               setSubmitting(false);
+              
             }}
-        >
+          >
             {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                isSubmitting,
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              isSubmitting,
             }) => (
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor="sql" className="block text-gray-700 mt-4">Crear tabla</label>
-                    <textarea
-                        id="sql"
-                        name="sql"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.sql}
-                        rows={5} // Número de filas visibles
-                        className="mt-2 p-2 w-full h-30 border border-gray-300 rounded-md"
-                        placeholder={`CREATE TABLE users (user_id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, email VARCHAR(100) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`}
-                    />
-                    {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
-                    <h4 className="mb-2 text-lg font-light text-gray-900">Sentencias aceptadas:</h4>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="sql" className="block text-gray-700">Sentencia SQL</label>
+                  <textarea
+                    id="sql"
+                    name="sql"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.sql}
+                    rows={5}
+                    className="mt-1 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    placeholder="CREATE TABLE users (user_id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL, email VARCHAR(100) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+                  />
+                  {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
+                  <h4 className="mb-2 text-lg font-light text-gray-900">Sentencias aceptadas:</h4>
                 <ul className="max-w-md space-y-1 text-gray-500 list-inside dark:text-gray-400">
                   <li className="flex items-center text-xs">
                     <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -393,34 +456,37 @@ function Dashboard() {
                     ALTER TABLE name_db RENAME TO name_db; 
                   </li>
                 </ul>
-                    <div className="form-group mb-6 text-left">
-                        <button type="submit" disabled={isSubmitting || !selectedDB} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                        Crear
-                        </button>
-                    </div>
-                </form>
+                </div>
+                <div className="text-left">
+                  <button type="submit" disabled={isSubmitting || !selectedDB} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Crear</button>
+                </div>
+              </form>
             )}
-        </Formik>
+          </Formik>
+        </div>
 
+        <section className="mb-8">
         <h2 className="mb-2 text-lg font-semibold text-gray-900">Tablas creadas</h2>
-        <ul className="max-w-md space-y-1 text-gray-500 list-disc list-inside">
-          {tables && tables.length > 0 ? (
-            tables.map((table, index) => (
-              <li key={index}>{table}</li>
+         <ul className="max-w-md space-y-1 text-gray-500 list-disc list-inside">
+           {tables && tables.length > 0 ? (
+             tables.map((table, index) => (
+               <li key={index}>{table}</li>
             ))
           ) : (
             <p>No hay tablas disponibles</p>
           )}
-        </ul>
+         </ul>
+        </section>
 
-        {/* Formulario para inserción de datos */}
-        <Formik
-          key={selectedDB}
+        <div className="mb-8 bg-gray-50 p-6 rounded-lg shadow-inner">
+          <h3 className="mb-4 text-lg font-medium text-gray-900">Insertar Datos en la Tabla</h3>
+          <Formik
+            key={selectedDB}
             initialValues={{ sql: '', databaseName: selectedDB }}
             validate={values => {
               const errors = {};
               if (!values.sql) {
-                  errors.sql = 'Required';
+                errors.sql = 'Requerido';
               } else {
                   const insertRegex = /^INSERT INTO [a-zA-Z_]+\s*\([a-zA-Z_,\s]+\)\s*VALUES\s*\((?:'[^']*'|[0-9]+)(?:,\s*(?:'[^']*'|[0-9]+))*\);$/;
                   const deleteRegex = /^DELETE FROM [a-zA-Z_]+\s+WHERE\s+[^;]+;$/;
@@ -443,40 +509,37 @@ function Dashboard() {
                   }
               }
               return errors;
-          }}
-          
-            onSubmit={(values, { setSubmitting }) => {
-                // Handle data insertion submission
-                console.log(values);
-                handleSubmitInserccionTable(values);
-                setSubmitting(false);
             }}
-            >
+            onSubmit={async(values, { setSubmitting }) => {
+              const lexicalResults = await performLexicalAnalysis(values.sql);
+              setLexicalResults(lexicalResults);
+              handleSubmitInserccionTable(values, { setSubmitting });
+            }}
+          >
             {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                isSubmitting,
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              isSubmitting,
             }) => (
-                <form onSubmit={handleSubmit}>
-                <div className="form-group mb-4">
-                    <label htmlFor="sql" className="block text-gray-700 mt-4">Inserción de datos a la tabla</label>
-                    <textarea
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="sql" className="block text-gray-700">Sentencia SQL</label>
+                  <textarea
                     id="sql"
                     name="sql"
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values.sql}
                     rows={3}
-                    className="mt-2 p-2 w-full h-30 border border-gray-300 rounded-md"
+                    className="mt-1 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     placeholder="INSERT INTO users (user_id, username, email, created_at) VALUES (2,'john_doe', 'john.doe@example.com', '2024-12-12');"
-                    />
-                    {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
-                    <h4 className="mb-2 text-lg font-light text-gray-900">Sentencias aceptadas:</h4>
-                <ul className="max-w-md space-y-1 text-gray-500 list-inside dark:text-gray-400">
+                  />
+                  {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
+                  <ul className="max-w-md space-y-1 text-gray-500 list-inside dark:text-gray-400">
                   <li className="flex items-center">
                     <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
@@ -495,74 +558,106 @@ function Dashboard() {
                     </svg>
                     DELETE FROM users WHERE user_id = 1;
                   </li>
-                </ul>
+                </ul>               
                 </div>
-                <div className="form-group mb-6 text-left">
-                    <button type="submit" disabled={isSubmitting || !selectedDB} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Insertar</button>
+                <div className="text-left">
+                  <button type="submit" disabled={isSubmitting || !selectedDB} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Insertar</button>
                 </div>
-                </form>
+              </form>
             )}
-        </Formik>
+          </Formik>
+        </div>
 
-
-        {/* Formulario para visualización de tabla */}
-        <Formik
-            initialValues={{ viewTable: '' }}
+        <div className="mb-8 bg-gray-50 p-6 rounded-lg shadow-inner">
+          <h3 className="mb-4 text-lg font-medium text-gray-900">Visualizar Tabla</h3>
+          <Formik
+            initialValues={{ sql: '' }}
             validate={values => {
-                const errors = {};
-                if (!values.viewTable) {
-                errors.viewTable = 'Required';
-                } else {
-                // Regex para validar la sentencia SELECT * FROM
-                const regex = /^SELECT \* FROM [a-zA-Z_]+;$/;
-                if (!regex.test(values.viewTable)) {
-                    errors.viewTable = 'La sentencia SQL no cumple con el formato requerido.';
+              const errors = {};
+              if (!values.sql) {
+                errors.sql = 'Requerido';
+              } else {
+                const regex = /^SELECT \* FROM public.[a-zA-Z_]+;$/;
+                if (!regex.test(values.sql)) {
+                  errors.sql = 'La sentencia SQL no cumple con el formato requerido.';
                 }
-                }
-                return errors;
+              }
+              return errors;
             }}
-            onSubmit={(values, { setSubmitting }) => {
-                // Handle table view submission
-                console.log(values);
-                setSubmitting(false);
+            onSubmit={async(values, { setSubmitting }) => {
+              const lexicalResults = await performLexicalAnalysis(values.sql);
+              setLexicalResults(lexicalResults);
+              handleSubmitSelectTable(values, { setSubmitting });
+              console.log(values);
             }}
-            >
+          >
             {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                isSubmitting,
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              isSubmitting,
             }) => (
-                <form onSubmit={handleSubmit}>
-                <div className="form-group mb-4">
-                    <label htmlFor="viewTable" className="block text-gray-700 mt-4">Visualizar la tabla</label>
-                    <input
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="sql" className="block text-gray-700">Sentencia SQL</label>
+                  <input
                     type="text"
-                    name="viewTable"
+                    name="sql"
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    value={values.viewTable}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    value={values.sql}
+                    className="mt-1 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     placeholder="SELECT * FROM public.usuarios;"
-                    />
-                    {errors.viewTable && touched.viewTable && <div className="text-red-500">{errors.viewTable}</div>}
+                  />
+                  {errors.sql && touched.sql && <div className="text-red-500">{errors.sql}</div>}
+                  <ul className="max-w-md space-y-1 text-gray-500 list-inside dark:text-gray-400">
+                  <li className="flex items-center">
+                    <svg className="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                    </svg>
+                    SELECT * FROM public.usuarios;
+                  </li>
+                  
+                </ul>
                 </div>
-                <div className="form-group mb-6 text-left">
-                    <button type="submit" disabled={isSubmitting || !selectedDB} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Visualizar</button>
+                <div className="text-left">
+                  <button type="submit" disabled={isSubmitting || !selectedDB} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Seleccionar</button>
                 </div>
-                </form>
+              </form>
             )}
-            </Formik>
+          </Formik>
+        </div>
 
-            {selectedDB && (
+        <section className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold text-gray-900">Resultados de la Tabla Seleccionada</h2>
+          {message ? (
+            <p className="text-red-500">{message}</p>
+          ) : (
+            selectTables.length > 0 ? (
+              <ul className="space-y-1 text-gray-700 list-disc list-inside pl-2">
+                {selectTables.map((item, index) => (
+                  <li key={index}>
+                    {Object.keys(item).map((key) => (
+                      <div key={key}><strong>{key}:</strong> {item[key]}</div>
+                    ))}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No se ha seleccionado una tabla</p>
+            )
+          )}
+        </section>
+
+        {selectedDB && (
               <div className="mt-6">
                 <h3 className="text-lg font-semibold">Tabla de resultados léxicos</h3>
                 {renderLexicalResultsTable()}
               </div>
-            )}
+        )}
       </div>
     </div>
   );

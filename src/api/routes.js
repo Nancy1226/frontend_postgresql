@@ -35,14 +35,20 @@ export const getTable = async(selectedDB) =>{
     return await axios.get(`http://34.239.194.240:3000/api/tables?databaseName=${selectedDB}`);
 }
 
+//Registros en la tabla
+export const insertTabla = async(valores) =>{
+    // return await axios.post('http://localhost:3000/api/data-operation', valores);
+    return await axios.post('http://34.239.194.240:3000/api/data-operation', valores);
+}
+
 //Seleccion de tabla
 export const selectTable = async(valores) =>{
     // return await axios.post('http://localhost:3000/api/select-operation', valores);
     return await axios.post('http://34.239.194.240:3000/api/select-operation', valores);
 }
 
-//Registros en la tabla
-export const insertTabla = async(valores) =>{
-    // return await axios.post('http://localhost:3000/api/data-operation', valores);
-    return await axios.post('http://34.239.194.240:3000/api/data-operation', valores);
+//Ruta para el python
+export const analizePython = async(sql) =>{
+    // return await axios.post('http://localhost:3000/api/select-operation', valores);
+    return await axios.post('http://127.0.0.1:5000/analyze', { query: sql });
 }

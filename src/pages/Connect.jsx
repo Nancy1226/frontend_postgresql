@@ -11,6 +11,7 @@ function ConnectSQL() {
   const { login } = useAuth();
 
   const handleSubmit = async (values) => {
+    try{
     const connect = await connectDB(values);
     if (connect.status === 200) {
       Swal.fire({
@@ -20,13 +21,16 @@ function ConnectSQL() {
       });
       login();  
       navigate("/dashboard");
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "¡No pudo conectar a la base de datos!"
-      });
     }
+    console.log('imprimiendo el response ',connect.data)
+  }catch(error){
+    console.log(error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "¡No pudo conectar a la base de datos!"
+    });
+  }
   };
 
   return (
